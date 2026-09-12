@@ -6,7 +6,7 @@ topics = ["cricket match score", "python programming tutorial", "delicious pasta
 
 texts = []
 for t in topics:
-    for i in range(500):
+    for i in range(5000):
         texts.append(f"{t} variant {i} discussion point {i % 7}")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 embeddings = model.encode(texts, show_progress_bar=True, normalize_embeddings=True)
