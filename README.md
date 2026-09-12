@@ -14,7 +14,7 @@ The core trick is surprisingly simple: draw a few random hyperplanes (think of t
 
 Here's why this is useful: two vectors that are genuinely close together in meaning are very likely to land on the *same side* of most random lines, since a line would have to cut precisely between them to separate them. Two unrelated vectors are much more likely to end up on opposite sides of at least a few lines. So vectors with the same (or very similar) bit-string tend to actually be similar in meaning.
 
-At search time, I only compare the query against vectors that hashed into the same bucket — not the whole dataset. I also use several independent hash tables at once, so a pair of vectors only needs to match in *one* of them to be considered — this recovers some of the accuracy that any single unlucky hyperplane might cost.
+At search time, I only compare the query against vectors that hashed into the same bucket not the whole dataset. I also use several independent hash tables at once, so a pair of vectors only needs to match in *one* of them to be considered  this recovers some of the accuracy that any single unlucky hyperplane might cost.
 
 ## The knob: `num_bits`
 
@@ -28,13 +28,13 @@ This is the one dial that trades speed for accuracy. More bits means more hyperp
 | 10 | 0.957 | 165.4 |
 | 14 | 0.877 | 288.0 |
 
-Going from 6 to 14 bits, recall drops from 98% to about 88%, while speed goes up roughly 4.4x (65 → 288 queries per second). That's the actual tradeoff, measured — not just claimed.
+Going from 6 to 14 bits, recall drops from 98% to about 88%, while speed goes up roughly 4.4x (65 → 288 queries per second). That's the actual tradeoff, measured  not just claimed.
 
 ## Why deletion is tricky (and what I did about it)
 
 I didn't build true deletion, and I want to be upfront about why rather than pretend it's not a gap.
 
-When you insert a vector, its ID gets scattered across multiple hash tables — up to `num_tables` different buckets, one per table. To actually remove it, I'd have to search through every bucket in every table to find and strip that one ID out, which is expensive and honestly works against the whole point of hashing in the first place.
+When you insert a vector, its ID gets scattered across multiple hash tables  up to `num_tables` different buckets, one per table. To actually remove it, I'd have to search through every bucket in every table to find and strip that one ID out, which is expensive and honestly works against the whole point of hashing in the first place.
 
 So instead, I use a tombstone: deleting a vector just marks its ID as "deleted" in a set, and every search silently filters those out. The vector's data still physically sits in the buckets, but it never shows up in results again. This is the same tradeoff most real hash-based systems make when faced with this exact problem — a working, honest compromise instead of a broken "real" delete function.
 
